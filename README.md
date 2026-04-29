@@ -1,8 +1,25 @@
-# Noctalia Voice Indicator
+# Noctalia Voice Type
 
-A tiny, configurable voice-dictation status indicator for the [Noctalia](https://github.com/noctalia-dev/noctalia-shell) shell / Quickshell ecosystem.
+A Wayland/niri voice typing toolkit with a configurable [Noctalia](https://github.com/noctalia-dev/noctalia-shell) / Quickshell bar indicator.
 
-It was built for a niri + Wayland desktop where floating GTK overlays were unreliable: instead of trying to place a separate window on the screen, the indicator lives directly in the top Noctalia bar.
+It started as a fix for unreliable floating GTK overlays on niri: instead of placing a separate window on screen, the status indicator lives directly in the top Noctalia bar. The product direction is broader: local hotkeys + provider-based transcription + safe text insertion + shell UI feedback.
+
+
+## Product direction
+
+This project is not just a microphone indicator. The intended shape is:
+
+```text
+F11/F12 hotkey → record audio → transcribe via provider → insert text → update Noctalia indicator
+```
+
+Provider goals:
+
+- **Deepgram** — first-class provider, user supplies `DEEPGRAM_API_KEY`.
+- **OpenRouter / OpenAI-compatible** — planned/experimental provider where users can set base URL, API key, and a model capable of audio transcription.
+- Local/private config only; no API keys in git.
+
+See [Configuration](docs/configuration.md).
 
 ## Features
 
@@ -34,6 +51,24 @@ States:
 {"state":"error","message":"","ts":1777460003}
 {"state":"hidden","message":"","ts":1777460004}
 ```
+
+
+## CLI prototype
+
+The repository now includes an early Python CLI prototype:
+
+```bash
+python -m pip install -e .
+cp .env.example ~/.config/noctalia-voice-type/env
+chmod 600 ~/.config/noctalia-voice-type/env
+$EDITOR ~/.config/noctalia-voice-type/env
+
+noctalia-voice-type doctor
+noctalia-voice-type transcribe-file sample.wav
+noctalia-voice-type record-once --insert
+```
+
+The current stable provider is Deepgram. OpenRouter/OpenAI-compatible transcription is tracked as roadmap work because gateway audio support differs by model/provider.
 
 ## Installation
 

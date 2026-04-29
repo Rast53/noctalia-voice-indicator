@@ -1,0 +1,17 @@
+[project]
+name = "noctalia-voice-type"
+version = "0.1.0"
+description = "Wayland/niri voice typing toolkit with Noctalia status indicator"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Ivan Pashkov" }]
+dependencies = [
+  "requests>=2.31.0",
+]
+
+[project.scripts]
+noctalia-voice-type = "noctalia_voice_type.cli:main"
+
+[tool.ruff]
+line-length = 100
