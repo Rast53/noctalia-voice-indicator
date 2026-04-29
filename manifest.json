@@ -1,0 +1,36 @@
+{
+  "id": "voice-type-indicator",
+  "name": "Voice Type Indicator",
+  "version": "1.2.0",
+  "minNoctaliaVersion": "3.6.0",
+  "author": "Raclaw",
+  "license": "MIT",
+  "description": "Small configurable bar indicator for F11/F12 voice dictation state.",
+  "tags": [
+    "Bar",
+    "Voice",
+    "Utility"
+  ],
+  "entryPoints": {
+    "barWidget": "BarWidget.qml",
+    "settings": "Settings.qml"
+  },
+  "dependencies": {
+    "plugins": []
+  },
+  "metadata": {
+    "defaultSettings": {
+      "dotScale": 0.38,
+      "activeWidthScale": 0.92,
+      "idleOpacity": 0.55,
+      "recordingColor": "#b86cff",
+      "processingColor": "#5da9ff",
+      "successColor": "#6be675",
+      "errorColor": "#ff6b6b",
+      "idleColor": "#6f7480",
+      "showIdle": true,
+      "pulse": true,
+      "visualStyle": "orb"
+    }
+  }
+}

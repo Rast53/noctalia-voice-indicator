@@ -1,0 +1,12 @@
+{
+  "dotScale": 0.48,
+  "activeWidthScale": 0.8900000000000001,
+  "idleOpacity": 0.9,
+  "recordingColor": "#b86cff",
+  "processingColor": "#5da9ff",
+  "successColor": "#6be675",
+  "errorColor": "#ff6b6b",
+  "idleColor": "#6f7480",
+  "showIdle": false,
+  "pulse": true
+}
