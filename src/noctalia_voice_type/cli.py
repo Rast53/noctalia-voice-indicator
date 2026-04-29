@@ -70,6 +70,21 @@ def cmd_doctor(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_niri_snippet(args: argparse.Namespace) -> int:
+    snippet = (
+        "binds {\n"
+        f"    {args.batch_key} allow-when-locked=false repeat=false {{\n"
+        f"        spawn \"{args.command}\" \"toggle-batch\";\n"
+        "    }\n\n"
+        f"    {args.stream_key} allow-when-locked=false repeat=false {{\n"
+        f"        spawn \"{args.command}\" \"toggle-stream\";\n"
+        "    }\n"
+        "}"
+    )
+    print(snippet)
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="noctalia-voice-type")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -85,6 +100,12 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("record-once", help="Record with arecord until Enter, then transcribe")
     p.add_argument("--insert", action="store_true", help="Insert result into focused app")
     p.set_defaults(func=cmd_record_once)
+
+    p = sub.add_parser("niri-snippet", help="Print niri config snippet for configurable hotkeys")
+    p.add_argument("--batch-key", default="F12", help="niri key spec for short/batch dictation")
+    p.add_argument("--stream-key", default="F11", help="niri key spec for long/streaming dictation")
+    p.add_argument("--command", default="noctalia-voice-type", help="command path used in niri spawn")
+    p.set_defaults(func=cmd_niri_snippet)
 
     return parser
 

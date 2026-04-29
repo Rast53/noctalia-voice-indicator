@@ -10,7 +10,7 @@ It started as a fix for unreliable floating GTK overlays on niri: instead of pla
 This project is not just a microphone indicator. The intended shape is:
 
 ```text
-F11/F12 hotkey → record audio → transcribe via provider → insert text → update Noctalia indicator
+niri hotkey → record audio → transcribe via provider → insert text → update Noctalia indicator
 ```
 
 Provider goals:
@@ -36,7 +36,7 @@ See [Configuration](docs/configuration.md).
   - recording / processing / success / error / idle colors;
   - idle visibility;
   - pulse animation.
-- Designed for F11/F12 voice dictation flows, but usable with any script that writes the same state file.
+- Designed for compositor-native niri keybinds. F11/F12 are suggested defaults, not hardcoded requirements.
 
 ## Preview
 
@@ -108,6 +108,20 @@ QT_QPA_PLATFORM=wayland qs -c noctalia-shell
 ```
 
 Exact restart details depend on your compositor/session manager.
+
+
+## Keybinds
+
+On Wayland, global hotkeys should be owned by the compositor. For niri, use native binds and point them at the CLI commands. F11/F12 are only defaults; users can choose any niri-compatible key spec.
+
+Generate a snippet:
+
+```bash
+noctalia-voice-type niri-snippet
+noctalia-voice-type niri-snippet --batch-key "Mod+V" --stream-key "Mod+Shift+V"
+```
+
+See [Niri keybinds](docs/niri-keybinds.md).
 
 ## State file contract
 
