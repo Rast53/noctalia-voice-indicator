@@ -30,7 +30,13 @@
       "idleColor": "#6f7480",
       "showIdle": true,
       "pulse": true,
-      "visualStyle": "orb"
+      "visualStyle": "orb",
+      "transcription": {
+        "provider": "deepgram",
+        "model": "nova-3",
+        "apiKeys": {},
+        "language": "ru"
+      }
     }
   }
 }

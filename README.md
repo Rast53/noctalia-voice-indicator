@@ -53,6 +53,26 @@ States:
 ```
 
 
+
+## Noctalia STT settings
+
+The plugin settings include a Transcription section inspired by Noctalia Assistant Panel:
+
+- provider: `Deepgram` for now;
+- model: defaults to `nova-3`, user-editable;
+- language: defaults to `ru`;
+- API key: can be stored in local Noctalia plugin settings or provided via environment variables.
+
+Supported environment variables:
+
+```bash
+DEEPGRAM_API_KEY=...
+# or
+NOCTALIA_VOICE_TYPE_DEEPGRAM_API_KEY=...
+```
+
+The API key must never be committed to git.
+
 ## CLI prototype
 
 The repository now includes an early Python CLI prototype:

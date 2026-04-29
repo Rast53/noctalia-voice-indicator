@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
 import qs.Commons
 import qs.Widgets
 
@@ -21,6 +22,24 @@ ColumnLayout {
     property bool showIdle: saved.showIdle ?? defaults.showIdle ?? true
     property bool pulse: saved.pulse ?? defaults.pulse ?? true
     property string visualStyle: saved.visualStyle || defaults.visualStyle || "orb"
+    property var transcriptionDefaults: defaults.transcription ?? ({})
+    property var transcriptionSaved: saved.transcription ?? ({})
+    property string transcriptionProvider: transcriptionSaved.provider || transcriptionDefaults.provider || "deepgram"
+    property string transcriptionModel: transcriptionSaved.model || transcriptionDefaults.model || "nova-3"
+    property string transcriptionLanguage: transcriptionSaved.language || transcriptionDefaults.language || "ru"
+    property var transcriptionApiKeys: transcriptionSaved.apiKeys || transcriptionDefaults.apiKeys || ({})
+    property string deepgramApiKey: transcriptionApiKeys["deepgram"] !== undefined ? transcriptionApiKeys["deepgram"] : ""
+    readonly property string envDeepgramApiKey: Quickshell.env("DEEPGRAM_API_KEY") || Quickshell.env("NOCTALIA_VOICE_TYPE_DEEPGRAM_API_KEY") || ""
+    readonly property bool deepgramApiKeyManagedByEnv: envDeepgramApiKey !== ""
+
+    readonly property var sttProviders: ({
+        "deepgram": {
+            "name": "Deepgram",
+            "defaultModel": "nova-3",
+            "requiresKey": true,
+            "keyUrl": "https://console.deepgram.com/"
+        }
+    })
 
     spacing: Style.marginM
 
@@ -33,6 +52,67 @@ ColumnLayout {
     NLabel {
         description: "Настройки маленького индикатора голосового ввода в верхней панели. Цвета вводятся HEX, например #b86cff."
         Layout.fillWidth: true
+    }
+
+    NDivider { Layout.fillWidth: true }
+
+    NText {
+        text: "Transcription"
+        pointSize: Style.fontSizeM
+        font.bold: true
+    }
+
+    NComboBox {
+        Layout.fillWidth: true
+        label: "STT provider"
+        description: "Пока реализован Deepgram. Позже сюда добавим OpenRouter/OpenAI-compatible STT."
+        model: [
+            { key: "deepgram", name: "Deepgram" }
+        ]
+        currentKey: root.transcriptionProvider
+        onSelected: function(key) {
+            root.transcriptionProvider = key
+            if ((root.transcriptionModel || "") === "")
+                root.transcriptionModel = root.sttProviders[key]?.defaultModel || "nova-3"
+        }
+    }
+
+    NTextInput {
+        Layout.fillWidth: true
+        label: "STT model"
+        description: "Deepgram model name. Leave empty to use provider default."
+        text: root.transcriptionModel === (root.sttProviders[root.transcriptionProvider]?.defaultModel || "") ? "" : root.transcriptionModel
+        placeholderText: root.sttProviders[root.transcriptionProvider]?.defaultModel || "nova-3"
+        onTextChanged: {
+            var value = (text || "").trim()
+            root.transcriptionModel = value === "" ? (root.sttProviders[root.transcriptionProvider]?.defaultModel || "nova-3") : value
+        }
+    }
+
+    NTextInput {
+        Layout.fillWidth: true
+        label: "Language"
+        description: "BCP-47/language code for STT, e.g. ru, en, auto."
+        text: root.transcriptionLanguage
+        placeholderText: "ru"
+        onTextChanged: root.transcriptionLanguage = (text || "").trim() || "ru"
+    }
+
+    NTextInput {
+        Layout.fillWidth: true
+        visible: root.sttProviders[root.transcriptionProvider]?.requiresKey ?? true
+        label: "Deepgram API key"
+        description: root.deepgramApiKeyManagedByEnv ? "Managed by environment variable" : "Stored in local Noctalia plugin settings. Get a key: https://console.deepgram.com/"
+        placeholderText: root.deepgramApiKeyManagedByEnv ? "Set via DEEPGRAM_API_KEY / NOCTALIA_VOICE_TYPE_DEEPGRAM_API_KEY" : "Enter Deepgram API key..."
+        text: root.deepgramApiKeyManagedByEnv ? "" : root.deepgramApiKey
+        enabled: !root.deepgramApiKeyManagedByEnv
+        inputMethodHints: Qt.ImhHiddenText
+        onTextChanged: {
+            if (!root.deepgramApiKeyManagedByEnv) {
+                root.deepgramApiKey = text
+                root.transcriptionApiKeys = Object.assign({}, root.transcriptionApiKeys, { "deepgram": text })
+            }
+        }
     }
 
     NDivider { Layout.fillWidth: true }
@@ -160,6 +240,12 @@ ColumnLayout {
         pluginApi.pluginSettings.idleColor = root.idleColor
         pluginApi.pluginSettings.showIdle = root.showIdle
         pluginApi.pluginSettings.pulse = root.pulse
+        pluginApi.pluginSettings.transcription = {
+            "provider": root.transcriptionProvider,
+            "model": root.transcriptionModel || (root.sttProviders[root.transcriptionProvider]?.defaultModel || "nova-3"),
+            "language": root.transcriptionLanguage || "ru",
+            "apiKeys": root.transcriptionApiKeys
+        }
         pluginApi.saveSettings()
     }
 }

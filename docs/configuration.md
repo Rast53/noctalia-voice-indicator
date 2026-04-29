@@ -48,3 +48,14 @@ VOICE_TYPE_STATE_FILE=/tmp/voice-type-state.json
 ```
 
 The Noctalia plugin reads this file. The CLI and future hotkey daemons write to it.
+
+## Noctalia plugin settings
+
+The Noctalia settings UI exposes the first STT provider settings directly:
+
+- STT provider: Deepgram;
+- STT model: default `nova-3`;
+- language: default `ru`;
+- Deepgram API key.
+
+The key can also be managed by environment variable. If `DEEPGRAM_API_KEY` or `NOCTALIA_VOICE_TYPE_DEEPGRAM_API_KEY` is present in the Quickshell/Noctalia environment, the UI treats the key as environment-managed and does not show/store it in plugin settings.
