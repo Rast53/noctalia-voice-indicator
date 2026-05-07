@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import Quickshell.Io
 import qs.Commons
 import qs.Widgets
 
@@ -32,6 +33,55 @@ ColumnLayout {
     readonly property string envDeepgramApiKey: Quickshell.env("DEEPGRAM_API_KEY") || Quickshell.env("NOCTALIA_VOICE_TYPE_DEEPGRAM_API_KEY") || ""
     readonly property bool deepgramApiKeyManagedByEnv: envDeepgramApiKey !== ""
 
+
+    readonly property string repoUrl: "https://github.com/Rast53/noctalia-voice-indicator"
+    readonly property string installCommand: "sudo pacman -S --needed git python python-pip python-virtualenv alsa-utils wl-clipboard wtype\n" +
+                                         "curl -fsSL https://raw.githubusercontent.com/Rast53/noctalia-voice-indicator/main/scripts/setup-cachyos.sh | bash\n" +
+                                         "# then edit ~/.config/noctalia-voice-type/env and set DEEPGRAM_API_KEY"
+    readonly property string niriCommand: "noctalia-voice-type niri-snippet"
+    property string setupStatus: "Checking setup status..."
+    property bool setupCheckDone: false
+    property bool cliInstalled: false
+
+    Process {
+        id: setupCheckProcess
+        command: ["bash", "-lc", "set -e; " +
+            "echo CLI=$(command -v noctalia-voice-type || true); " +
+            "echo ARECORD=$(command -v arecord || true); " +
+            "echo WLCOPY=$(command -v wl-copy || true); " +
+            "echo WTYPE=$(command -v wtype || true); " +
+            "test -f ~/.config/noctalia-voice-type/env && echo ENV=yes || echo ENV=no; " +
+            "noctalia-voice-type doctor 2>/dev/null || true"]
+        stdout: StdioCollector {}
+        stderr: StdioCollector {}
+        onExited: function(exitCode) {
+            var out = stdout.text || ""
+            root.cliInstalled = out.indexOf("CLI=") >= 0 && out.indexOf("CLI=\n") < 0
+            root.setupCheckDone = true
+            root.setupStatus = out.trim() || stderr.text.trim() || "No setup information available"
+        }
+    }
+
+    Process {
+        id: copyProcess
+        command: ["wl-copy"]
+        stdinEnabled: true
+        property string pendingText: ""
+        onStarted: {
+            write(pendingText)
+            pendingText = ""
+            stdinEnabled = false
+        }
+    }
+
+    function copyToClipboard(text) {
+        copyProcess.pendingText = text
+        copyProcess.stdinEnabled = true
+        copyProcess.running = true
+    }
+
+    Component.onCompleted: setupCheckProcess.running = true
+
     readonly property var sttProviders: ({
         "deepgram": {
             "name": "Deepgram",
@@ -52,6 +102,73 @@ ColumnLayout {
     NLabel {
         description: "Настройки маленького индикатора голосового ввода в верхней панели. Цвета вводятся HEX, например #b86cff."
         Layout.fillWidth: true
+    }
+
+    NDivider { Layout.fillWidth: true }
+
+    NText {
+        text: "Setup"
+        pointSize: Style.fontSizeM
+        font.bold: true
+    }
+
+    NLabel {
+        label: root.cliInstalled ? "CLI detected" : "CLI is not installed yet"
+        description: "The Noctalia plugin is only the visual indicator. For real dictation you also need the local CLI, system tools, Deepgram key, and niri keybinds."
+        Layout.fillWidth: true
+    }
+
+    NTextInput {
+        Layout.fillWidth: true
+        label: "1. Install local CLI and system dependencies"
+        description: "Run this once in a terminal on CachyOS. Then edit the env file and add your DEEPGRAM_API_KEY."
+        text: root.installCommand
+        readOnly: true
+        showClearButton: false
+    }
+
+    RowLayout {
+        Layout.fillWidth: true
+        spacing: Style.marginM
+        NButton {
+            text: "Copy install command"
+            icon: "copy"
+            onClicked: root.copyToClipboard(root.installCommand)
+        }
+        NButton {
+            text: "Refresh setup status"
+            icon: "refresh"
+            outlined: true
+            onClicked: setupCheckProcess.running = true
+        }
+    }
+
+    NTextInput {
+        Layout.fillWidth: true
+        label: "2. Add niri keybinds"
+        description: "After CLI install, run this and paste the snippet into ~/.config/niri/config.kdl. F12 = batch, F11 = long dictation."
+        text: root.niriCommand
+        readOnly: true
+        showClearButton: false
+    }
+
+    RowLayout {
+        Layout.fillWidth: true
+        spacing: Style.marginM
+        NButton {
+            text: "Copy niri command"
+            icon: "copy"
+            onClicked: root.copyToClipboard(root.niriCommand)
+        }
+    }
+
+    NTextInput {
+        Layout.fillWidth: true
+        label: "Setup status / doctor"
+        description: "This is a local check from the current Noctalia session. It never prints secrets."
+        text: root.setupStatus
+        readOnly: true
+        showClearButton: false
     }
 
     NDivider { Layout.fillWidth: true }

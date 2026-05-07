@@ -162,7 +162,7 @@ noctalia-voice-type niri-snippet
 noctalia-voice-type niri-snippet --batch-key "Mod+V" --stream-key "Mod+Shift+V"
 ```
 
-See [Niri keybinds](docs/niri-keybinds.md).
+See [Niri keybinds](docs/niri-keybinds.md) and [Fresh CachyOS setup](docs/fresh-cachyos.md).
 
 ## State file contract
 

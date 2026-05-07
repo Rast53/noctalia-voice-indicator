@@ -25,7 +25,13 @@ The Python voice typing CLI is intentionally kept at the repository root and mus
 
 ## Fresh CachyOS voice typing setup
 
-After installing the plugin from Noctalia, install the local CLI:
+After installing the plugin from Noctalia, open the plugin settings for the setup checklist, or install the local CLI with:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Rast53/noctalia-voice-indicator/main/scripts/setup-cachyos.sh | bash
+```
+
+Manual path:
 
 ```bash
 git clone https://github.com/Rast53/noctalia-voice-indicator ~/.local/src/noctalia-voice-type

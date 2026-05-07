@@ -1,11 +1,11 @@
 {
   "id": "voice-type-indicator",
   "name": "Voice Type Indicator",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "minNoctaliaVersion": "3.6.0",
   "author": "Raclaw",
   "license": "MIT",
-  "description": "Noctalia bar indicator for Voice Type dictation state, with Deepgram STT settings.",
+  "description": "Noctalia bar indicator and setup guide for Voice Type dictation with Deepgram STT.",
   "tags": [
     "Bar",
     "Voice",
