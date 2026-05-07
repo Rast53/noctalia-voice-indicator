@@ -42,7 +42,11 @@ class VoiceTypeConfig:
             language=os.environ.get("VOICE_TYPE_LANGUAGE", "ru").strip(),
             state_file=os.environ.get("VOICE_TYPE_STATE_FILE", "/tmp/voice-type-state.json").strip(),
             insert_method=os.environ.get("VOICE_TYPE_INSERT_METHOD", "wayland-clipboard").strip(),
-            deepgram_api_key=os.environ.get("DEEPGRAM_API_KEY", "").strip(),
+            deepgram_api_key=(
+                os.environ.get("DEEPGRAM_API_KEY")
+                or os.environ.get("NOCTALIA_VOICE_TYPE_DEEPGRAM_API_KEY")
+                or ""
+            ).strip(),
             deepgram_model=os.environ.get("DEEPGRAM_MODEL", "nova-3").strip(),
             openai_compat_base_url=os.environ.get("OPENAI_COMPAT_BASE_URL", "").strip(),
             openai_compat_api_key=os.environ.get("OPENAI_COMPAT_API_KEY", "").strip(),

@@ -78,6 +78,8 @@ The API key must never be committed to git.
 The repository now includes an early Python CLI prototype:
 
 ```bash
+scripts/install-cli.sh
+# or manually:
 python -m pip install -e .
 cp .env.example ~/.config/noctalia-voice-type/env
 chmod 600 ~/.config/noctalia-voice-type/env
@@ -86,17 +88,36 @@ $EDITOR ~/.config/noctalia-voice-type/env
 noctalia-voice-type doctor
 noctalia-voice-type transcribe-file sample.wav
 noctalia-voice-type record-once --insert
+noctalia-voice-type toggle-batch
+noctalia-voice-type toggle-stream
 ```
 
 The current stable provider is Deepgram. OpenRouter/OpenAI-compatible transcription is tracked as roadmap work because gateway audio support differs by model/provider.
 
 ## Installation
 
-Clone or copy this plugin into your Noctalia plugins directory:
+### From Noctalia Plugin Manager — recommended
+
+This repository is a Noctalia plugin source.
+
+1. Open **Noctalia Settings → Plugins → Sources**.
+2. Click **Add plugin source**.
+3. Use:
+   - Repository Name: `Noctalia Voice Type`
+   - Repository URL: `https://github.com/Rast53/noctalia-voice-indicator`
+4. Refresh available plugins.
+5. Install **Voice Type Indicator**.
+6. Enable it and add `plugin:voice-type-indicator` to the bar if Noctalia does not add it automatically.
+
+The plugin manager installs the `voice-type-indicator/` subdirectory from this repository. See [Plugin source install](docs/noctalia-plugin-source.md).
+
+### Manual plugin installation
+
+Clone or copy the plugin subdirectory into your Noctalia plugins directory:
 
 ```bash
-git clone https://github.com/Rast53/noctalia-voice-indicator.git \
-  ~/.config/noctalia/plugins/voice-type-indicator
+git clone https://github.com/Rast53/noctalia-voice-indicator.git ~/.local/src/noctalia-voice-type
+ln -s ~/.local/src/noctalia-voice-type/voice-type-indicator ~/.config/noctalia/plugins/voice-type-indicator
 ```
 
 Enable it in `~/.config/noctalia/plugins.json`:
@@ -180,13 +201,16 @@ PY
 
 ## Development
 
-This repository contains a local Noctalia plugin:
+This repository contains an installable Noctalia plugin source:
 
 ```text
-manifest.json
-BarWidget.qml
-Settings.qml
+registry.json
+voice-type-indicator/manifest.json
+voice-type-indicator/BarWidget.qml
+voice-type-indicator/Settings.qml
 ```
+
+Root-level `manifest.json`, `BarWidget.qml`, and `Settings.qml` are kept as development mirrors for easier local editing.
 
 There is no build step. Edit QML files, copy/symlink them into `~/.config/noctalia/plugins/voice-type-indicator`, and restart Noctalia.
 

@@ -8,6 +8,7 @@ from .insert import insert_text
 from .providers import build_provider
 from .record import record_wav_until_enter
 from .state import set_state
+from .toggle import toggle
 
 
 def cmd_transcribe_file(args: argparse.Namespace) -> int:
@@ -70,6 +71,16 @@ def cmd_doctor(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_toggle_batch(args: argparse.Namespace) -> int:
+    return toggle("batch")
+
+
+def cmd_toggle_stream(args: argparse.Namespace) -> int:
+    # Streaming is currently implemented as the long-dictation toggle path. It keeps the
+    # external F11/F12 semantics stable while provider-level streaming is developed.
+    return toggle("stream")
+
+
 def cmd_niri_snippet(args: argparse.Namespace) -> int:
     snippet = (
         "binds {\n"
@@ -100,6 +111,12 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("record-once", help="Record with arecord until Enter, then transcribe")
     p.add_argument("--insert", action="store_true", help="Insert result into focused app")
     p.set_defaults(func=cmd_record_once)
+
+    p = sub.add_parser("toggle-batch", help="Toggle short/batch dictation recording")
+    p.set_defaults(func=cmd_toggle_batch)
+
+    p = sub.add_parser("toggle-stream", help="Toggle long dictation recording")
+    p.set_defaults(func=cmd_toggle_stream)
 
     p = sub.add_parser("niri-snippet", help="Print niri config snippet for configurable hotkeys")
     p.add_argument("--batch-key", default="F12", help="niri key spec for short/batch dictation")

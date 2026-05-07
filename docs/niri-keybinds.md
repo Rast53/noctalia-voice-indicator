@@ -45,6 +45,15 @@ Then reload niri config:
 niri msg action load-config
 ```
 
+## Toggle behavior
+
+The commands are toggles:
+
+- first key press starts recording and sets the Noctalia state to `recording`;
+- second key press stops recording, transcribes, inserts text through `wl-copy` + `wtype Ctrl+V`, then returns the indicator to idle.
+
+`toggle-stream` currently preserves the long-dictation/F11 user interface but uses the same robust batch transcription path internally. Provider-level streaming is future work.
+
 ## Manual snippet
 
 ```kdl
