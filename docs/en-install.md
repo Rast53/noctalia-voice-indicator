@@ -72,7 +72,7 @@ niri msg action load-config
 Defaults:
 
 - `F12` — short dictation: press → speak → press again → text is inserted.
-- `F11` — long/stream-style dictation toggle.
+- `F11` — long dictation: press once to start; it auto-stops after 10 seconds of silence, or press F11 again to stop manually.
 
 ## 5. Check readiness
 

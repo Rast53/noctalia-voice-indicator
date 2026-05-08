@@ -16,6 +16,12 @@ VOICE_TYPE_LANGUAGE={language}
 VOICE_TYPE_STATE_FILE=/tmp/voice-type-state.json
 VOICE_TYPE_INSERT_METHOD=wayland-clipboard
 
+# F11 long dictation auto-stop: finish after this many seconds of silence.
+# Set to 0 to disable auto-stop.
+VOICE_TYPE_AUTO_STOP_SILENCE_SECONDS=10
+VOICE_TYPE_AUTO_STOP_MIN_RECORD_SECONDS=2
+VOICE_TYPE_AUTO_STOP_RMS_THRESHOLD=500
+
 # Deepgram
 DEEPGRAM_API_KEY=
 DEEPGRAM_MODEL=nova-3

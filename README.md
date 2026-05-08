@@ -63,7 +63,7 @@ niri msg action load-config
 Defaults:
 
 - `F12` — short/batch dictation toggle.
-- `F11` — long dictation toggle.
+- `F11` — long dictation: press once to start; it auto-stops after 10 seconds of silence, or press F11 again to stop manually.
 
 ### 5. Check readiness
 
@@ -113,6 +113,7 @@ VOICE_TYPE_PROVIDER=deepgram
 VOICE_TYPE_LANGUAGE=ru
 VOICE_TYPE_STATE_FILE=/tmp/voice-type-state.json
 VOICE_TYPE_INSERT_METHOD=wayland-clipboard
+VOICE_TYPE_AUTO_STOP_SILENCE_SECONDS=10
 DEEPGRAM_API_KEY=your-key
 DEEPGRAM_MODEL=nova-3
 ```

@@ -31,7 +31,22 @@ VOICE_TYPE_STATE_FILE=/tmp/voice-type-state.json
 VOICE_TYPE_INSERT_METHOD=wayland-clipboard
 DEEPGRAM_API_KEY=your-key
 DEEPGRAM_MODEL=nova-3
+VOICE_TYPE_AUTO_STOP_SILENCE_SECONDS=10
+VOICE_TYPE_AUTO_STOP_MIN_RECORD_SECONDS=2
+VOICE_TYPE_AUTO_STOP_RMS_THRESHOLD=500
 ```
+
+## F11 auto-stop on silence
+
+For long dictation (`toggle-stream` / default F11), recording can stop automatically after a pause:
+
+```env
+VOICE_TYPE_AUTO_STOP_SILENCE_SECONDS=10
+VOICE_TYPE_AUTO_STOP_MIN_RECORD_SECONDS=2
+VOICE_TYPE_AUTO_STOP_RMS_THRESHOLD=500
+```
+
+Set `VOICE_TYPE_AUTO_STOP_SILENCE_SECONDS=0` to disable auto-stop. F12 short/batch dictation stays manual.
 
 The first generated env file uses `ru` when system locale starts with `ru`, otherwise `en`.
 

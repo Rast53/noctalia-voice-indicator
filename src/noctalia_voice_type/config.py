@@ -33,6 +33,9 @@ class VoiceTypeConfig:
     openai_compat_base_url: str
     openai_compat_api_key: str
     openai_compat_model: str
+    auto_stop_silence_seconds: float
+    auto_stop_min_record_seconds: float
+    auto_stop_rms_threshold: int
 
     @classmethod
     def from_env(cls) -> "VoiceTypeConfig":
@@ -51,4 +54,7 @@ class VoiceTypeConfig:
             openai_compat_base_url=os.environ.get("OPENAI_COMPAT_BASE_URL", "").strip(),
             openai_compat_api_key=os.environ.get("OPENAI_COMPAT_API_KEY", "").strip(),
             openai_compat_model=os.environ.get("OPENAI_COMPAT_MODEL", "").strip(),
+            auto_stop_silence_seconds=float(os.environ.get("VOICE_TYPE_AUTO_STOP_SILENCE_SECONDS", "10") or "10"),
+            auto_stop_min_record_seconds=float(os.environ.get("VOICE_TYPE_AUTO_STOP_MIN_RECORD_SECONDS", "2") or "2"),
+            auto_stop_rms_threshold=int(os.environ.get("VOICE_TYPE_AUTO_STOP_RMS_THRESHOLD", "500") or "500"),
         )

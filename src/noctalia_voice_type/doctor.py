@@ -78,6 +78,9 @@ def run_checks(config: VoiceTypeConfig | None = None) -> list[Check]:
     checks.append(Check("language", "OK", config.language or "auto"))
     checks.append(Check("state_file", "OK" if _path_exists(config.state_file) else "WARN", config.state_file, "It will be created automatically; run init-config to create it now."))
     checks.append(Check("insert_method", "OK", config.insert_method))
+    checks.append(Check("auto_stop_silence_seconds", "OK", str(config.auto_stop_silence_seconds)))
+    checks.append(Check("auto_stop_min_record_seconds", "OK", str(config.auto_stop_min_record_seconds)))
+    checks.append(Check("auto_stop_rms_threshold", "OK", str(config.auto_stop_rms_threshold)))
     return checks
 
 

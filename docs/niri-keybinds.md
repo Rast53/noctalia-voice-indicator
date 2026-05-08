@@ -15,7 +15,7 @@ This keeps hotkeys compositor-native and avoids brittle X11/pynput-style global 
 Suggested defaults:
 
 - `F12` — short batch dictation toggle.
-- `F11` — long/streaming dictation toggle.
+- `F11` — long dictation: press once to start; it auto-stops after 10 seconds of silence, or press F11 again to stop manually.
 
 But these are only defaults. Users can choose any niri-compatible key combination.
 
@@ -51,6 +51,8 @@ The commands are toggles:
 
 - first key press starts recording and sets the Noctalia state to `recording`;
 - second key press stops recording, transcribes, inserts text through `wl-copy` + `wtype Ctrl+V`, then returns the indicator to idle.
+
+For `toggle-stream`, a silence watcher also stops recording automatically after `VOICE_TYPE_AUTO_STOP_SILENCE_SECONDS` seconds of silence. Default: 10 seconds. Set it to `0` to disable.
 
 `toggle-stream` currently preserves the long-dictation/F11 user interface but uses the same robust batch transcription path internally. Provider-level streaming is future work.
 
