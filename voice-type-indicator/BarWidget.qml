@@ -17,6 +17,9 @@ Item {
     property int sectionWidgetsCount: 0
 
     property string voiceState: "idle"
+    property string voiceMessage: ""
+    property int countdown: 0
+    property bool autoStopCountdown: false
     property string tooltip: localizedState("idle")
     readonly property string localeName: (Qt.locale().name || Quickshell.env("LANG") || "en").toLowerCase()
     readonly property bool isRu: localeName.indexOf("ru") === 0
@@ -64,9 +67,17 @@ Item {
             let s = data.state || "idle";
             if (s === "hidden" || s === "ready") s = "idle";
             root.voiceState = s;
-            root.tooltip = root.localizedState(s);
+            root.voiceMessage = data.message || "";
+            root.countdown = Number(data.countdown || 0);
+            root.autoStopCountdown = Boolean(data.autoStop) && root.countdown > 0;
+            root.tooltip = root.autoStopCountdown
+                ? root.tr("Auto-stop in ", "Автостоп через ") + root.countdown + root.tr(" sec", " сек")
+                : root.localizedState(s);
         } catch (e) {
             root.voiceState = "error";
+            root.voiceMessage = "";
+            root.countdown = 0;
+            root.autoStopCountdown = false;
             root.tooltip = root.tr("Voice input: state read error", "Голосовой ввод: ошибка чтения состояния");
         }
     }
@@ -87,6 +98,9 @@ Item {
         onLoaded: root.parseState(text())
         onLoadFailed: function(error) {
             root.voiceState = "idle";
+            root.voiceMessage = "";
+            root.countdown = 0;
+            root.autoStopCountdown = false;
             root.tooltip = root.localizedState("idle");
         }
     }
@@ -219,6 +233,29 @@ Item {
                         NumberAnimation { to: Math.max(3, visualWrap.height * modelData * 0.58); duration: 430; easing.type: Easing.InOutSine }
                     }
                 }
+            }
+        }
+
+        Rectangle {
+            anchors.centerIn: parent
+            width: Math.min(parent.width, parent.height) * 0.92
+            height: width
+            radius: width / 2
+            visible: root.autoStopCountdown && root.voiceState === "recording"
+            color: Qt.rgba(0, 0, 0, 0.34)
+            border.color: Qt.rgba(1, 1, 1, 0.28)
+            border.width: 1
+            scale: visible ? 1.0 : 0.75
+            opacity: visible ? 1.0 : 0.0
+            Behavior on scale { NumberAnimation { duration: 120; easing.type: Easing.OutBack } }
+            Behavior on opacity { NumberAnimation { duration: 120 } }
+
+            NText {
+                anchors.centerIn: parent
+                text: String(root.countdown)
+                color: "#ffffff"
+                pointSize: Math.max(9, Math.round(parent.height * 0.42))
+                font.bold: true
             }
         }
     }

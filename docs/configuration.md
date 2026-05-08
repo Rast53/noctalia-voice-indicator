@@ -46,7 +46,7 @@ VOICE_TYPE_AUTO_STOP_MIN_RECORD_SECONDS=2
 VOICE_TYPE_AUTO_STOP_RMS_THRESHOLD=500
 ```
 
-Set `VOICE_TYPE_AUTO_STOP_SILENCE_SECONDS=0` to disable auto-stop. F12 short/batch dictation stays manual. The Noctalia plugin settings expose this as **F11 auto-stop** with a 3–30 second pause slider; after changing it, run `noctalia-voice-type sync-noctalia-settings` so the CLI env receives the new value.
+Set `VOICE_TYPE_AUTO_STOP_SILENCE_SECONDS=0` to disable auto-stop. F12 short/batch dictation stays manual. The Noctalia plugin settings expose this as **F11 auto-stop** with a 3–30 second pause slider; after changing it, run `noctalia-voice-type sync-noctalia-settings` so the CLI env receives the new value. During the silence pause, the bar indicator shows a countdown before auto-stop.
 
 The first generated env file uses `ru` when system locale starts with `ru`, otherwise `en`.
 

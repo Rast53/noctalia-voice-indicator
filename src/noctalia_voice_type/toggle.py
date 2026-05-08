@@ -94,9 +94,22 @@ def watch_silence(kind: str, config: VoiceTypeConfig | None = None) -> int:
         elif silent:
             if silent_since is None:
                 silent_since = now
-            elif now - silent_since >= config.auto_stop_silence_seconds:
+            elapsed_silence = now - silent_since
+            remaining = max(0, int(config.auto_stop_silence_seconds - elapsed_silence + 0.999))
+            if remaining > 0:
+                set_state(
+                    config.state_file,
+                    "recording",
+                    str(remaining),
+                    autoStop=True,
+                    countdown=remaining,
+                    silenceSeconds=config.auto_stop_silence_seconds,
+                )
+            if elapsed_silence >= config.auto_stop_silence_seconds:
                 return _stop(kind, config, stopped_by="auto_silence")
         else:
+            if silent_since is not None:
+                set_state(config.state_file, "recording")
             silent_since = None
         time.sleep(0.5)
 

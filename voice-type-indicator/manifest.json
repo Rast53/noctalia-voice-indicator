@@ -1,11 +1,11 @@
 {
   "id": "voice-type-indicator",
   "name": "Voice Type Indicator",
-  "version": "1.6.1",
+  "version": "1.7.0",
   "minNoctaliaVersion": "3.6.0",
   "author": "Raclaw",
   "license": "MIT",
-  "description": "Locale-aware Noctalia bar indicator and production setup guide for Voice Type dictation with Deepgram STT.",
+  "description": "Locale-aware Noctalia Voice Type indicator with configurable F11 auto-stop and countdown overlay.",
   "tags": [
     "Bar",
     "Voice",

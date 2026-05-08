@@ -83,6 +83,7 @@ noctalia-voice-type doctor --human
 - Private local config in `~/.config/noctalia-voice-type/env`.
 - Secret-safe diagnostics with `noctalia-voice-type doctor`.
 - Deepgram STT provider (`nova-3` by default).
+- F11 silence countdown overlay: when a pause is detected, the bar shows `5 4 3 2 1` before auto-stop.
 - Compositor-native niri keybind snippet generation.
 
 ## CLI

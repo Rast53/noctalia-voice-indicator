@@ -52,7 +52,7 @@ The commands are toggles:
 - first key press starts recording and sets the Noctalia state to `recording`;
 - second key press stops recording, transcribes, inserts text through `wl-copy` + `wtype Ctrl+V`, then returns the indicator to idle.
 
-For `toggle-stream`, a silence watcher also stops recording automatically after `VOICE_TYPE_AUTO_STOP_SILENCE_SECONDS` seconds of silence. Default: 10 seconds. The plugin settings expose a 3–30 second range and a disable toggle. Set `VOICE_TYPE_AUTO_STOP_SILENCE_SECONDS=0` to disable manually.
+For `toggle-stream`, a silence watcher also stops recording automatically after `VOICE_TYPE_AUTO_STOP_SILENCE_SECONDS` seconds of silence. Default: 10 seconds. The plugin settings expose a 3–30 second range and a disable toggle. Set `VOICE_TYPE_AUTO_STOP_SILENCE_SECONDS=0` to disable manually. While the pause countdown is active, the Noctalia bar indicator overlays the remaining seconds.
 
 `toggle-stream` currently preserves the long-dictation/F11 user interface but uses the same robust batch transcription path internally. Provider-level streaming is future work.
 
