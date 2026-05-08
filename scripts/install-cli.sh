@@ -21,20 +21,25 @@ else
   python -m pip install --user -e "$repo_dir"
 fi
 
-if [ ! -f "$config_dir/env" ]; then
-  cp "$repo_dir/.env.example" "$config_dir/env"
-  chmod 600 "$config_dir/env"
-  echo "Created $config_dir/env — add your DEEPGRAM_API_KEY there."
+if command -v "$bin_dir/noctalia-voice-type" >/dev/null 2>&1; then
+  "$bin_dir/noctalia-voice-type" init-config || true
 else
-  echo "Keeping existing $config_dir/env"
+  echo "WARN: CLI symlink was not created; cannot initialize config automatically." >&2
+fi
+
+if [ -f "$config_dir/env" ]; then
+  chmod 600 "$config_dir/env"
+  echo "Config file ready: $config_dir/env"
 fi
 
 cat <<MSG
 Installed noctalia-voice-type CLI.
 
 Next:
-  1. Ensure dependencies: sudo pacman -S --needed alsa-utils wl-clipboard wtype
-  2. Edit: $config_dir/env
-  3. Run: noctalia-voice-type doctor
-  4. Add niri binds from: noctalia-voice-type niri-snippet
+  1. Put your Deepgram key into $config_dir/env, or enter it in the plugin settings and run:
+     noctalia-voice-type sync-noctalia-settings
+  2. Check readiness:
+     noctalia-voice-type doctor --human
+  3. Add niri binds from:
+     noctalia-voice-type niri-snippet
 MSG

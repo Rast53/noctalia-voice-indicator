@@ -23,8 +23,17 @@ fi
 "$repo_dir/scripts/install-cli.sh"
 
 echo
+cli="$HOME/.local/bin/noctalia-voice-type"
 if command -v noctalia-voice-type >/dev/null 2>&1; then
-  noctalia-voice-type doctor || true
+  cli="noctalia-voice-type"
+elif [ -x "$cli" ]; then
+  export PATH="$HOME/.local/bin:$PATH"
+fi
+
+if command -v noctalia-voice-type >/dev/null 2>&1; then
+  noctalia-voice-type init-config || true
+  echo
+  noctalia-voice-type doctor --human || true
   echo
   echo "Niri snippet:"
   noctalia-voice-type niri-snippet || true
@@ -35,8 +44,13 @@ fi
 echo
 cat <<MSG
 Next steps:
-  1. Edit ~/.config/noctalia-voice-type/env and set DEEPGRAM_API_KEY.
-  2. Add the niri snippet above to ~/.config/niri/config.kdl.
-  3. Reload niri: niri msg action load-config
-  4. Restart Noctalia if the bar widget is not visible.
+  1. Add your Deepgram key:
+     - edit ~/.config/noctalia-voice-type/env, or
+     - enter it in Noctalia plugin settings and run: noctalia-voice-type sync-noctalia-settings
+  2. Run: noctalia-voice-type doctor --human
+  3. Add the niri snippet above to ~/.config/niri/config.kdl.
+  4. Reload niri: niri msg action load-config
+  5. Restart Noctalia if the bar widget is not visible.
+
+Повторный запуск безопасен: репозиторий обновится, env-файл и ключи сохранятся.
 MSG

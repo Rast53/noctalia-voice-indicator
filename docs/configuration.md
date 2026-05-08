@@ -1,32 +1,72 @@
 # Configuration
 
-Noctalia Voice Type must not ship with private API keys. Users provide their own provider credentials locally.
+Noctalia Voice Type never ships with private API keys. Users provide credentials locally.
 
-Recommended local config path:
+Private config path:
 
 ```text
 ~/.config/noctalia-voice-type/env
 ```
 
-Start from:
+Create it with:
 
 ```bash
-mkdir -p ~/.config/noctalia-voice-type
-cp .env.example ~/.config/noctalia-voice-type/env
-chmod 600 ~/.config/noctalia-voice-type/env
-$EDITOR ~/.config/noctalia-voice-type/env
+noctalia-voice-type init-config
+```
+
+or through the installer:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Rast53/noctalia-voice-indicator/main/scripts/setup-cachyos.sh | bash
 ```
 
 ## Deepgram provider
 
+Deepgram is the stable provider.
+
 ```env
 VOICE_TYPE_PROVIDER=deepgram
 VOICE_TYPE_LANGUAGE=ru
+VOICE_TYPE_STATE_FILE=/tmp/voice-type-state.json
+VOICE_TYPE_INSERT_METHOD=wayland-clipboard
 DEEPGRAM_API_KEY=your-key
 DEEPGRAM_MODEL=nova-3
 ```
 
-Deepgram is the first implemented provider because it has a straightforward low-latency speech-to-text API and WebSocket streaming support.
+The first generated env file uses `ru` when system locale starts with `ru`, otherwise `en`.
+
+## Sync from Noctalia plugin settings
+
+The plugin settings UI can store provider/model/language/API key locally inside Noctalia settings. The CLI needs its own private env file, so after saving plugin settings run:
+
+```bash
+noctalia-voice-type sync-noctalia-settings
+```
+
+This command copies values into `~/.config/noctalia-voice-type/env` and never prints the API key.
+
+If `DEEPGRAM_API_KEY` or `NOCTALIA_VOICE_TYPE_DEEPGRAM_API_KEY` is present in the Noctalia/Quickshell environment, the settings UI treats the key as environment-managed and does not show/store it.
+
+## Diagnostics
+
+```bash
+noctalia-voice-type doctor --human
+```
+
+Checks:
+
+- CLI executable on `PATH`;
+- env file existence;
+- `arecord`, `wl-copy`, `wtype`;
+- stable provider selection;
+- Deepgram API key presence;
+- model/language/state-file/insert-method.
+
+Secrets are never printed. Use `--strict` in scripts if you want non-zero exit when required checks fail:
+
+```bash
+noctalia-voice-type doctor --human --strict
+```
 
 ## OpenRouter / OpenAI-compatible providers
 
@@ -39,23 +79,4 @@ OPENAI_COMPAT_API_KEY=your-key
 OPENAI_COMPAT_MODEL=some/model-that-can-transcribe-audio
 ```
 
-This is intentionally not marked stable yet: OpenAI-compatible chat gateways differ in how they accept audio files, and not every multimodal model is a good transcription model.
-
-## Indicator state
-
-```env
-VOICE_TYPE_STATE_FILE=/tmp/voice-type-state.json
-```
-
-The Noctalia plugin reads this file. The CLI and future hotkey daemons write to it.
-
-## Noctalia plugin settings
-
-The Noctalia settings UI exposes the first STT provider settings directly:
-
-- STT provider: Deepgram;
-- STT model: default `nova-3`;
-- language: default `ru`;
-- Deepgram API key.
-
-The key can also be managed by environment variable. If `DEEPGRAM_API_KEY` or `NOCTALIA_VOICE_TYPE_DEEPGRAM_API_KEY` is present in the Quickshell/Noctalia environment, the UI treats the key as environment-managed and does not show/store it in plugin settings.
+This is intentionally not stable yet: OpenAI-compatible chat gateways differ in how they accept audio files, and not every multimodal model is a good transcription model.

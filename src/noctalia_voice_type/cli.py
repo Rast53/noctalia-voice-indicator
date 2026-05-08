@@ -3,10 +3,14 @@ from __future__ import annotations
 import argparse
 import sys
 
+from pathlib import Path
+
 from .config import VoiceTypeConfig, DEFAULT_ENV_PATH
+from .doctor import format_checks, has_errors, run_checks
 from .insert import insert_text
 from .providers import build_provider
 from .record import record_wav_until_enter
+from .setup import init_config, sync_noctalia_settings
 from .state import set_state
 from .toggle import toggle
 
@@ -57,17 +61,24 @@ def cmd_record_once(args: argparse.Namespace) -> int:
 
 
 def cmd_doctor(args: argparse.Namespace) -> int:
-    config = VoiceTypeConfig.from_env()
+    checks = run_checks()
+    print(format_checks(checks, human=args.human))
+    return 1 if has_errors(checks) and args.strict else 0
+
+
+def cmd_init_config(args: argparse.Namespace) -> int:
+    created = init_config(language=args.language)
     print(f"env_file={DEFAULT_ENV_PATH}")
-    print(f"provider={config.provider}")
-    print(f"language={config.language}")
-    print(f"state_file={config.state_file}")
-    print(f"insert_method={config.insert_method}")
-    print(f"deepgram_model={config.deepgram_model}")
-    print(f"deepgram_api_key_set={bool(config.deepgram_api_key)}")
-    print(f"openai_compat_base_url_set={bool(config.openai_compat_base_url)}")
-    print(f"openai_compat_api_key_set={bool(config.openai_compat_api_key)}")
-    print(f"openai_compat_model={config.openai_compat_model or '<unset>'}")
+    print("created=true" if created else "created=false")
+    print("state_file=ready")
+    return 0
+
+
+def cmd_sync_noctalia_settings(args: argparse.Namespace) -> int:
+    src = sync_noctalia_settings(Path(args.path).expanduser() if args.path else None)
+    print(f"synced_from={src}")
+    print(f"env_file={DEFAULT_ENV_PATH}")
+    print("deepgram_api_key=preserved_or_synced_without_printing")
     return 0
 
 
@@ -101,7 +112,17 @@ def build_parser() -> argparse.ArgumentParser:
     sub = parser.add_subparsers(dest="command", required=True)
 
     p = sub.add_parser("doctor", help="Print configuration diagnostics without secrets")
+    p.add_argument("--human", action="store_true", help="Print an actionable human-readable report")
+    p.add_argument("--strict", action="store_true", help="Exit non-zero when required checks fail")
     p.set_defaults(func=cmd_doctor)
+
+    p = sub.add_parser("init-config", help="Create private env and state files if missing")
+    p.add_argument("--language", choices=["ru", "en", "auto"], default=None, help="Default STT language for a new env file")
+    p.set_defaults(func=cmd_init_config)
+
+    p = sub.add_parser("sync-noctalia-settings", help="Copy provider/model/language/API key from local Noctalia plugin settings into CLI env")
+    p.add_argument("--path", help="Explicit Noctalia plugin settings.json path")
+    p.set_defaults(func=cmd_sync_noctalia_settings)
 
     p = sub.add_parser("transcribe-file", help="Transcribe an existing WAV file")
     p.add_argument("path")

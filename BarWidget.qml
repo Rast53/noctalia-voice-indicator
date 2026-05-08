@@ -17,7 +17,19 @@ Item {
     property int sectionWidgetsCount: 0
 
     property string voiceState: "idle"
-    property string tooltip: "Voice input: idle"
+    property string tooltip: localizedState("idle")
+    readonly property string localeName: (Qt.locale().name || Quickshell.env("LANG") || "en").toLowerCase()
+    readonly property bool isRu: localeName.indexOf("ru") === 0
+
+    function tr(en, ru) { return root.isRu ? ru : en }
+
+    function localizedState(state) {
+        if (state === "recording") return tr("Voice input: recording", "Голосовой ввод: запись")
+        if (state === "processing") return tr("Voice input: processing", "Голосовой ввод: обработка")
+        if (state === "success") return tr("Voice input: success", "Голосовой ввод: готово")
+        if (state === "error") return tr("Voice input: error", "Голосовой ввод: ошибка")
+        return tr("Voice input: idle", "Голосовой ввод: ожидание")
+    }
 
     readonly property var cfg: pluginApi?.pluginSettings ?? ({})
     readonly property var defaults: pluginApi?.manifest?.metadata?.defaultSettings ?? ({})
@@ -52,10 +64,10 @@ Item {
             let s = data.state || "idle";
             if (s === "hidden" || s === "ready") s = "idle";
             root.voiceState = s;
-            root.tooltip = "Voice input: " + s;
+            root.tooltip = root.localizedState(s);
         } catch (e) {
             root.voiceState = "error";
-            root.tooltip = "Voice input: state read error";
+            root.tooltip = root.tr("Voice input: state read error", "Голосовой ввод: ошибка чтения состояния");
         }
     }
 
@@ -75,7 +87,7 @@ Item {
         onLoaded: root.parseState(text())
         onLoadFailed: function(error) {
             root.voiceState = "idle";
-            root.tooltip = "Voice input: idle";
+            root.tooltip = root.localizedState("idle");
         }
     }
 

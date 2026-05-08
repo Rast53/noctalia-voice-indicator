@@ -15,48 +15,31 @@ This repository is a Noctalia plugin source.
 
 ## What the plugin manager installs
 
-Noctalia clones only the `voice-type-indicator/` subdirectory from this repository. That directory contains:
+Noctalia installs the `voice-type-indicator/` subdirectory from this repository:
 
 - `manifest.json`
 - `BarWidget.qml`
 - `Settings.qml`
 
-The Python voice typing CLI is intentionally kept at the repository root and must be installed separately for real dictation.
+The Python voice typing CLI lives at the repository root and must be installed separately for real dictation.
 
-## Fresh CachyOS voice typing setup
+## Production install flow
 
-After installing the plugin from Noctalia, open the plugin settings for the setup checklist, or install the local CLI with:
+Use the bilingual guides:
+
+- English: [en-install.md](en-install.md)
+- Русский: [ru-install.md](ru-install.md)
+
+Short version for CachyOS/Arch:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/Rast53/noctalia-voice-indicator/main/scripts/setup-cachyos.sh | bash
-```
-
-Manual path:
-
-```bash
-git clone https://github.com/Rast53/noctalia-voice-indicator ~/.local/src/noctalia-voice-type
-cd ~/.local/src/noctalia-voice-type
-python -m venv ~/.local/share/noctalia-voice-type/venv
-~/.local/share/noctalia-voice-type/venv/bin/python -m pip install -U pip
-~/.local/share/noctalia-voice-type/venv/bin/python -m pip install -e .
-mkdir -p ~/.local/bin ~/.config/noctalia-voice-type
-ln -sf ~/.local/share/noctalia-voice-type/venv/bin/noctalia-voice-type ~/.local/bin/noctalia-voice-type
-cp .env.example ~/.config/noctalia-voice-type/env
-chmod 600 ~/.config/noctalia-voice-type/env
-$EDITOR ~/.config/noctalia-voice-type/env
-```
-
-Required system packages on CachyOS/Arch:
-
-```bash
-sudo pacman -S --needed git python python-pip python-virtualenv alsa-utils wl-clipboard wtype
-```
-
-Then check:
-
-```bash
-noctalia-voice-type doctor
+noctalia-voice-type doctor --human
 noctalia-voice-type niri-snippet
 ```
 
-Add the generated binds to `~/.config/niri/config.kdl`, restart niri/Noctalia, and use the configured keys.
+Add a Deepgram key either in `~/.config/noctalia-voice-type/env` or in the plugin settings followed by:
+
+```bash
+noctalia-voice-type sync-noctalia-settings
+```
