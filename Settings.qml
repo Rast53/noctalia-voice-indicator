@@ -188,60 +188,6 @@ ColumnLayout {
 
     NDivider { Layout.fillWidth: true }
 
-    NText { text: root.tr("Transcription", "Распознавание"); pointSize: Style.fontSizeM; font.bold: true }
-
-    NComboBox {
-        Layout.fillWidth: true
-        label: root.tr("STT provider", "Провайдер STT")
-        description: root.tr("Deepgram is stable now. OpenRouter/OpenAI-compatible STT is planned.", "Сейчас стабильно реализован Deepgram. OpenRouter/OpenAI-compatible STT — в плане.")
-        model: [{ key: "deepgram", name: "Deepgram" }]
-        currentKey: root.transcriptionProvider
-        onSelected: function(key) {
-            root.transcriptionProvider = key
-            if ((root.transcriptionModel || "") === "") root.transcriptionModel = root.sttProviders[key]?.defaultModel || "nova-3"
-        }
-    }
-
-    NTextInput {
-        Layout.fillWidth: true
-        label: root.tr("STT model", "Модель STT")
-        description: root.tr("Deepgram model name. Leave empty to use provider default.", "Название модели Deepgram. Оставьте пустым для значения по умолчанию.")
-        text: root.transcriptionModel === (root.sttProviders[root.transcriptionProvider]?.defaultModel || "") ? "" : root.transcriptionModel
-        placeholderText: root.sttProviders[root.transcriptionProvider]?.defaultModel || "nova-3"
-        onTextChanged: {
-            var value = (text || "").trim()
-            root.transcriptionModel = value === "" ? (root.sttProviders[root.transcriptionProvider]?.defaultModel || "nova-3") : value
-        }
-    }
-
-    NTextInput {
-        Layout.fillWidth: true
-        label: root.tr("Language", "Язык")
-        description: root.tr("BCP-47/language code for STT, e.g. ru, en, auto.", "Код языка для STT: ru, en, auto и т.п.")
-        text: root.transcriptionLanguage
-        placeholderText: root.defaultSttLanguage()
-        onTextChanged: root.transcriptionLanguage = (text || "").trim() || root.defaultSttLanguage()
-    }
-
-    NTextInput {
-        Layout.fillWidth: true
-        visible: root.sttProviders[root.transcriptionProvider]?.requiresKey ?? true
-        label: root.tr("Deepgram API key", "API-ключ Deepgram")
-        description: root.deepgramApiKeyManagedByEnv ? root.tr("Managed by environment variable", "Управляется переменной окружения") : root.tr("Stored only in local Noctalia plugin settings. Get a key: https://console.deepgram.com/", "Хранится только в локальных настройках плагина Noctalia. Ключ: https://console.deepgram.com/")
-        placeholderText: root.deepgramApiKeyManagedByEnv ? "DEEPGRAM_API_KEY / NOCTALIA_VOICE_TYPE_DEEPGRAM_API_KEY" : root.tr("Enter Deepgram API key...", "Введите API-ключ Deepgram...")
-        text: root.deepgramApiKeyManagedByEnv ? "" : root.deepgramApiKey
-        enabled: !root.deepgramApiKeyManagedByEnv
-        inputMethodHints: Qt.ImhHiddenText
-        onTextChanged: {
-            if (!root.deepgramApiKeyManagedByEnv) {
-                root.deepgramApiKey = text
-                root.transcriptionApiKeys = Object.assign({}, root.transcriptionApiKeys, { "deepgram": text })
-            }
-        }
-    }
-
-    NDivider { Layout.fillWidth: true }
-
     NText { text: root.tr("F11 auto-stop", "Автостоп F11"); pointSize: Style.fontSizeM; font.bold: true }
 
     NToggle {
@@ -305,6 +251,60 @@ ColumnLayout {
             "After changing this, save settings and run the sync command above so the CLI env receives the new value.",
             "После изменения сохраните настройки и выполните команду синхронизации выше, чтобы CLI env получил новое значение."
         )
+    }
+
+    NDivider { Layout.fillWidth: true }
+
+    NText { text: root.tr("Transcription", "Распознавание"); pointSize: Style.fontSizeM; font.bold: true }
+
+    NComboBox {
+        Layout.fillWidth: true
+        label: root.tr("STT provider", "Провайдер STT")
+        description: root.tr("Deepgram is stable now. OpenRouter/OpenAI-compatible STT is planned.", "Сейчас стабильно реализован Deepgram. OpenRouter/OpenAI-compatible STT — в плане.")
+        model: [{ key: "deepgram", name: "Deepgram" }]
+        currentKey: root.transcriptionProvider
+        onSelected: function(key) {
+            root.transcriptionProvider = key
+            if ((root.transcriptionModel || "") === "") root.transcriptionModel = root.sttProviders[key]?.defaultModel || "nova-3"
+        }
+    }
+
+    NTextInput {
+        Layout.fillWidth: true
+        label: root.tr("STT model", "Модель STT")
+        description: root.tr("Deepgram model name. Leave empty to use provider default.", "Название модели Deepgram. Оставьте пустым для значения по умолчанию.")
+        text: root.transcriptionModel === (root.sttProviders[root.transcriptionProvider]?.defaultModel || "") ? "" : root.transcriptionModel
+        placeholderText: root.sttProviders[root.transcriptionProvider]?.defaultModel || "nova-3"
+        onTextChanged: {
+            var value = (text || "").trim()
+            root.transcriptionModel = value === "" ? (root.sttProviders[root.transcriptionProvider]?.defaultModel || "nova-3") : value
+        }
+    }
+
+    NTextInput {
+        Layout.fillWidth: true
+        label: root.tr("Language", "Язык")
+        description: root.tr("BCP-47/language code for STT, e.g. ru, en, auto.", "Код языка для STT: ru, en, auto и т.п.")
+        text: root.transcriptionLanguage
+        placeholderText: root.defaultSttLanguage()
+        onTextChanged: root.transcriptionLanguage = (text || "").trim() || root.defaultSttLanguage()
+    }
+
+    NTextInput {
+        Layout.fillWidth: true
+        visible: root.sttProviders[root.transcriptionProvider]?.requiresKey ?? true
+        label: root.tr("Deepgram API key", "API-ключ Deepgram")
+        description: root.deepgramApiKeyManagedByEnv ? root.tr("Managed by environment variable", "Управляется переменной окружения") : root.tr("Stored only in local Noctalia plugin settings. Get a key: https://console.deepgram.com/", "Хранится только в локальных настройках плагина Noctalia. Ключ: https://console.deepgram.com/")
+        placeholderText: root.deepgramApiKeyManagedByEnv ? "DEEPGRAM_API_KEY / NOCTALIA_VOICE_TYPE_DEEPGRAM_API_KEY" : root.tr("Enter Deepgram API key...", "Введите API-ключ Deepgram...")
+        text: root.deepgramApiKeyManagedByEnv ? "" : root.deepgramApiKey
+        enabled: !root.deepgramApiKeyManagedByEnv
+        inputMethodHints: Qt.ImhHiddenText
+        onTextChanged: {
+            if (!root.deepgramApiKeyManagedByEnv) {
+                root.deepgramApiKey = text
+                root.transcriptionApiKeys = Object.assign({}, root.transcriptionApiKeys, { "deepgram": text })
+            }
+        }
     }
 
     NDivider { Layout.fillWidth: true }

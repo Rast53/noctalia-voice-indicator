@@ -1,7 +1,7 @@
 {
   "id": "voice-type-indicator",
   "name": "Voice Type Indicator",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "minNoctaliaVersion": "3.6.0",
   "author": "Raclaw",
   "license": "MIT",
