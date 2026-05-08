@@ -1,7 +1,7 @@
 {
   "id": "voice-type-indicator",
   "name": "Voice Type Indicator",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "minNoctaliaVersion": "3.6.0",
   "author": "Raclaw",
   "license": "MIT",
@@ -36,6 +36,12 @@
         "model": "nova-3",
         "apiKeys": {},
         "language": "ru"
+      },
+      "autoStop": {
+        "enabled": true,
+        "silenceSeconds": 10,
+        "minRecordSeconds": 2,
+        "rmsThreshold": 500
       }
     }
   },

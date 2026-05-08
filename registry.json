@@ -4,10 +4,10 @@
     {
       "id": "voice-type-indicator",
       "name": "Voice Type Indicator",
-      "version": "1.5.0",
+      "version": "1.6.0",
       "official": false,
       "author": "Raclaw",
-      "description": "Locale-aware Noctalia Voice Type indicator with guided CLI setup.",
+      "description": "Locale-aware Noctalia Voice Type indicator with guided CLI setup and configurable F11 auto-stop.",
       "repository": "https://github.com/Rast53/noctalia-voice-indicator",
       "minNoctaliaVersion": "3.6.0",
       "license": "MIT",
@@ -16,7 +16,7 @@
         "Voice",
         "Utility"
       ],
-      "lastUpdated": "2026-05-08T10:15:00Z"
+      "lastUpdated": "2026-05-08T10:50:00Z"
     }
   ]
 }

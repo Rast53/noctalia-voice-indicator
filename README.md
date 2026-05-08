@@ -13,7 +13,7 @@ niri hotkey → record audio → transcribe via Deepgram → insert text → upd
 - English install guide: [docs/en-install.md](docs/en-install.md)
 - Русская инструкция: [docs/ru-install.md](docs/ru-install.md)
 
-The plugin UI is locale-aware: `ru*` system locale uses Russian, every other locale uses English.
+The plugin UI is locale-aware: `ru*` system locale uses Russian, every other locale uses English. F11 auto-stop pause is configurable in plugin settings: default 10 seconds, range 3–30 seconds.
 
 ## Quick install
 
@@ -63,7 +63,7 @@ niri msg action load-config
 Defaults:
 
 - `F12` — short/batch dictation toggle.
-- `F11` — long dictation: press once to start; it auto-stops after 10 seconds of silence, or press F11 again to stop manually.
+- `F11` — long dictation: press once to start; it auto-stops after the configured silence pause, or press F11 again to stop manually. Default pause: 10 seconds.
 
 ### 5. Check readiness
 

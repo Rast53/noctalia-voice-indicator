@@ -23,6 +23,12 @@ ColumnLayout {
     property bool showIdle: saved.showIdle ?? defaults.showIdle ?? true
     property bool pulse: saved.pulse ?? defaults.pulse ?? true
     property string visualStyle: saved.visualStyle || defaults.visualStyle || "wave"
+    property var autoStopDefaults: defaults.autoStop ?? ({})
+    property var autoStopSaved: saved.autoStop ?? ({})
+    property bool autoStopEnabled: autoStopSaved.enabled ?? autoStopDefaults.enabled ?? true
+    property int autoStopSilenceSeconds: Number(autoStopSaved.silenceSeconds ?? autoStopDefaults.silenceSeconds ?? 10)
+    property int autoStopMinRecordSeconds: Number(autoStopSaved.minRecordSeconds ?? autoStopDefaults.minRecordSeconds ?? 2)
+    property int autoStopRmsThreshold: Number(autoStopSaved.rmsThreshold ?? autoStopDefaults.rmsThreshold ?? 500)
     property var transcriptionDefaults: defaults.transcription ?? ({})
     property var transcriptionSaved: saved.transcription ?? ({})
     property string transcriptionProvider: transcriptionSaved.provider || transcriptionDefaults.provider || "deepgram"
@@ -47,6 +53,7 @@ ColumnLayout {
     function tr(en, ru) { return root.isRu ? ru : en }
     function defaultSttLanguage() { return root.isRu ? "ru" : "en" }
     function pct(value) { return Math.round(value * 100) + "%" }
+    function secondsLabel(value) { return Math.round(value) + " " + root.tr("sec", "сек") }
 
     Process {
         id: setupCheckProcess
@@ -235,6 +242,73 @@ ColumnLayout {
 
     NDivider { Layout.fillWidth: true }
 
+    NText { text: root.tr("F11 auto-stop", "Автостоп F11"); pointSize: Style.fontSizeM; font.bold: true }
+
+    NToggle {
+        Layout.fillWidth: true
+        label: root.tr("Stop long dictation after silence", "Останавливать длинную диктовку после тишины")
+        description: root.tr(
+            "Applies to F11 / long dictation only. F12 short dictation stays manual.",
+            "Работает только для F11 / длинной диктовки. F12 остаётся ручным."
+        )
+        checked: root.autoStopEnabled
+        onToggled: checked => root.autoStopEnabled = checked
+    }
+
+    NLabel {
+        label: root.tr("Silence pause", "Пауза тишины")
+        description: root.autoStopEnabled
+            ? root.tr("Recording stops after ", "Запись остановится через ") + root.secondsLabel(root.autoStopSilenceSeconds) + root.tr(" of silence.", " тишины.")
+            : root.tr("Auto-stop is disabled.", "Автостоп выключен.")
+    }
+
+    NSlider {
+        Layout.fillWidth: true
+        enabled: root.autoStopEnabled
+        from: 3
+        to: 30
+        stepSize: 1
+        value: root.autoStopSilenceSeconds
+        onValueChanged: root.autoStopSilenceSeconds = Math.round(value)
+    }
+
+    NLabel {
+        label: root.tr("Minimum recording time", "Минимальная длительность записи")
+        description: root.secondsLabel(root.autoStopMinRecordSeconds)
+    }
+
+    NSlider {
+        Layout.fillWidth: true
+        enabled: root.autoStopEnabled
+        from: 1
+        to: 8
+        stepSize: 1
+        value: root.autoStopMinRecordSeconds
+        onValueChanged: root.autoStopMinRecordSeconds = Math.round(value)
+    }
+
+    NTextInput {
+        Layout.fillWidth: true
+        enabled: root.autoStopEnabled
+        label: root.tr("Silence sensitivity / RMS threshold", "Чувствительность тишины / RMS-порог")
+        description: root.tr("Lower = stricter silence detection. Default: 500. Usually you do not need to change this.", "Ниже = строже определение тишины. По умолчанию: 500. Обычно менять не нужно.")
+        text: String(root.autoStopRmsThreshold)
+        onTextChanged: {
+            var parsed = parseInt(text)
+            if (!isNaN(parsed)) root.autoStopRmsThreshold = Math.max(50, Math.min(5000, parsed))
+        }
+    }
+
+    NLabel {
+        Layout.fillWidth: true
+        description: root.tr(
+            "After changing this, save settings and run the sync command above so the CLI env receives the new value.",
+            "После изменения сохраните настройки и выполните команду синхронизации выше, чтобы CLI env получил новое значение."
+        )
+    }
+
+    NDivider { Layout.fillWidth: true }
+
     NText { text: root.tr("Indicator", "Индикатор"); pointSize: Style.fontSizeM; font.bold: true }
 
     NComboBox {
@@ -322,6 +396,12 @@ ColumnLayout {
         pluginApi.pluginSettings.idleColor = root.idleColor
         pluginApi.pluginSettings.showIdle = root.showIdle
         pluginApi.pluginSettings.pulse = root.pulse
+        pluginApi.pluginSettings.autoStop = {
+            "enabled": root.autoStopEnabled,
+            "silenceSeconds": root.autoStopEnabled ? root.autoStopSilenceSeconds : 0,
+            "minRecordSeconds": root.autoStopMinRecordSeconds,
+            "rmsThreshold": root.autoStopRmsThreshold
+        }
         pluginApi.pluginSettings.transcription = {
             "provider": root.transcriptionProvider,
             "model": root.transcriptionModel || (root.sttProviders[root.transcriptionProvider]?.defaultModel || "nova-3"),

@@ -116,6 +116,15 @@ def load_plugin_transcription(path: Path | None = None) -> tuple[Path, dict[str,
         "VOICE_TYPE_LANGUAGE": str(transcription.get("language", default_language())),
         "DEEPGRAM_MODEL": str(transcription.get("model", "nova-3")),
     }
+    auto_stop = data.get("autoStop", {}) if isinstance(data, dict) else {}
+    if isinstance(auto_stop, dict) and auto_stop:
+        enabled = bool(auto_stop.get("enabled", True))
+        silence_seconds = auto_stop.get("silenceSeconds", 10)
+        values["VOICE_TYPE_AUTO_STOP_SILENCE_SECONDS"] = "0" if not enabled else str(int(float(silence_seconds)))
+        if "minRecordSeconds" in auto_stop:
+            values["VOICE_TYPE_AUTO_STOP_MIN_RECORD_SECONDS"] = str(int(float(auto_stop.get("minRecordSeconds", 2))))
+        if "rmsThreshold" in auto_stop:
+            values["VOICE_TYPE_AUTO_STOP_RMS_THRESHOLD"] = str(int(float(auto_stop.get("rmsThreshold", 500))))
     deepgram_key = api_keys.get("deepgram") if isinstance(api_keys, dict) else ""
     if deepgram_key:
         values["DEEPGRAM_API_KEY"] = str(deepgram_key)
