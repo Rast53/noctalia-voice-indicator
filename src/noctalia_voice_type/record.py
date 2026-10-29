@@ -12,9 +12,15 @@ def _read_wav(path: Path) -> bytes:
     return data
 
 
-def start_arecord(path: Path) -> subprocess.Popen[bytes]:
+def start_arecord(path: Path, duration_seconds: int | None = None) -> subprocess.Popen[bytes]:
+    argv = ["arecord", "-f", "S16_LE", "-r", "16000", "-c", "1", "-t", "wav"]
+    # Hard cap on recording length: without it a forgotten toggle-batch writes
+    # until the WAV limit (~2 GiB) and fills the tmpfs behind /tmp.
+    if duration_seconds and duration_seconds > 0:
+        argv.append(f"--duration={int(duration_seconds)}")
+    argv.append(str(path))
     return subprocess.Popen(
-        ["arecord", "-f", "S16_LE", "-r", "16000", "-c", "1", "-t", "wav", str(path)],
+        argv,
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
     )

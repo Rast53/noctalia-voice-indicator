@@ -12,7 +12,7 @@ from .providers import build_provider
 from .record import record_wav_until_enter
 from .setup import init_config, sync_noctalia_settings
 from .state import set_state
-from .toggle import toggle, watch_silence
+from .toggle import toggle, watch_limit, watch_silence
 
 
 def cmd_transcribe_file(args: argparse.Namespace) -> int:
@@ -96,6 +96,10 @@ def cmd_watch_silence(args: argparse.Namespace) -> int:
     return watch_silence(args.kind)
 
 
+def cmd_watch_limit(args: argparse.Namespace) -> int:
+    return watch_limit(args.kind)
+
+
 def cmd_niri_snippet(args: argparse.Namespace) -> int:
     snippet = (
         "binds {\n"
@@ -146,6 +150,10 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("watch-silence", help=argparse.SUPPRESS)
     p.add_argument("kind", choices=["stream"])
     p.set_defaults(func=cmd_watch_silence)
+
+    p = sub.add_parser("watch-limit", help=argparse.SUPPRESS)
+    p.add_argument("kind", choices=["batch", "stream"])
+    p.set_defaults(func=cmd_watch_limit)
 
     p = sub.add_parser("niri-snippet", help="Print niri config snippet for configurable hotkeys")
     p.add_argument("--batch-key", default="F12", help="niri key spec for short/batch dictation")

@@ -121,6 +121,24 @@ DEEPGRAM_MODEL=nova-3
 
 See [docs/configuration.md](docs/configuration.md).
 
+## Where recordings live (and their limits)
+
+Recording WAVs are written to a private directory inside the user runtime dir, **not** to the shared `/tmp`:
+
+```text
+$XDG_RUNTIME_DIR/noctalia-voice-type/recordings/   # fallback: $TMPDIR/noctalia-voice-type/recordings
+```
+
+On hosts where `/tmp` is a tmpfs, a forgotten recording used to eat RAM and break unrelated builds. Two limits prevent that:
+
+| Variable | Default | Meaning |
+| --- | --- | --- |
+| `VOICE_TYPE_MAX_RECORD_SECONDS` | `1800` | hard cap on a single recording (`arecord --duration`) |
+| `VOICE_TYPE_STALE_RECORD_HOURS` | `12` | how old an orphaned WAV must be before it is removed on the next start / `doctor` |
+
+`noctalia-voice-type doctor` prints the recordings directory, how many files it holds, their total size, and how many stale files it cleaned.
+
+
 ## State file contract
 
 The widget watches:

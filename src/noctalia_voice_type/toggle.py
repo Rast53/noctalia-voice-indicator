@@ -19,6 +19,63 @@ from .state import set_state
 RUNTIME_DIR = Path(os.environ.get("XDG_RUNTIME_DIR", tempfile.gettempdir())) / "noctalia-voice-type"
 
 
+def recordings_dir() -> Path:
+    """Каталог WAV-записей: внутри RUNTIME_DIR пользователя, а не общий /tmp.
+
+    /tmp на части хостов — tmpfs (RAM); забытая запись там съедает память
+    и роняет сборки, которым нужен /tmp.
+    """
+    return RUNTIME_DIR / "recordings"
+
+
+def cleanup_stale_recordings(config: VoiceTypeConfig | None = None) -> tuple[int, int]:
+    """Удаляет осиротевшие WAV старше `stale_record_hours`.
+
+    Сирота — файл в каталоге записей, на который не ссылается ни одна активная
+    сессия (batch/stream). Возвращает (файлов убрано, байт освобождено).
+    """
+    config = config or VoiceTypeConfig.from_env()
+    directory = recordings_dir()
+    if not directory.is_dir():
+        return (0, 0)
+    active: set[str] = set()
+    for kind in ("batch", "stream"):
+        session = _read_session(kind)
+        if session and session.get("wav_path"):
+            active.add(str(session["wav_path"]))
+    cutoff = time.time() - max(0.0, config.stale_record_hours) * 3600.0
+    removed = 0
+    freed = 0
+    for path in directory.glob("noctalia_voice_*.wav"):
+        try:
+            if str(path) in active:
+                continue
+            stat = path.stat()
+            if stat.st_mtime > cutoff:
+                continue
+            path.unlink()
+            removed += 1
+            freed += stat.st_size
+        except OSError:
+            continue
+    return (removed, freed)
+
+
+def recordings_stats() -> tuple[int, int]:
+    """Сколько WAV лежит в каталоге записей и сколько они занимают байт."""
+    count = 0
+    total = 0
+    directory = recordings_dir()
+    if directory.is_dir():
+        for path in directory.glob("noctalia_voice_*.wav"):
+            try:
+                count += 1
+                total += path.stat().st_size
+            except OSError:
+                continue
+    return (count, total)
+
+
 def _session_path(kind: str) -> Path:
     return RUNTIME_DIR / f"{kind}.json"
 
@@ -65,6 +122,38 @@ def _start_auto_stop_watcher(kind: str) -> int:
         start_new_session=True,
     )
     return int(proc.pid)
+
+
+def _start_limit_watcher(kind: str) -> int:
+    proc = subprocess.Popen(
+        [sys.executable, "-m", "noctalia_voice_type.cli", "watch-limit", kind],
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        start_new_session=True,
+    )
+    return int(proc.pid)
+
+
+def watch_limit(kind: str, config: VoiceTypeConfig | None = None) -> int:
+    """Закрывает запись, когда arecord завершился сам по `--duration`.
+
+    Без этого сторожа состояние остаётся `recording`, а файл на диске никто
+    не обрабатывает (пользователь думает, что запись идёт).
+    """
+    config = config or VoiceTypeConfig.from_env()
+    while True:
+        session = _read_session(kind)
+        if not session:
+            return 0
+        pid = int(session.get("pid", -1))
+        if pid <= 0:
+            return 0
+        if not _is_pid_running(pid):
+            if not _read_session(kind):
+                return 0
+            return _stop(kind, config, stopped_by="auto_limit")
+        time.sleep(0.5)
 
 
 def watch_silence(kind: str, config: VoiceTypeConfig | None = None) -> int:
@@ -121,14 +210,27 @@ def _start(kind: str, config: VoiceTypeConfig) -> int:
         print(f"{kind} recording is already running; stopping it instead.")
         return _stop(kind, config)
 
-    with tempfile.NamedTemporaryFile(prefix=f"noctalia_voice_{kind}_", suffix=".wav", delete=False) as tmp:
+    directory = recordings_dir()
+    directory.mkdir(parents=True, exist_ok=True)
+    removed, freed = cleanup_stale_recordings(config)
+    if removed:
+        print(f"cleaned {removed} stale recording(s), freed {freed / (1024 * 1024):.1f} MiB")
+
+    with tempfile.NamedTemporaryFile(
+        prefix=f"noctalia_voice_{kind}_", suffix=".wav", dir=directory, delete=False
+    ) as tmp:
         wav_path = Path(tmp.name)
-    proc = start_arecord(wav_path)
+    proc = start_arecord(wav_path, config.max_record_seconds)
     session = {"pid": proc.pid, "wav_path": str(wav_path), "started_at": time.time()}
     _write_session(kind, session)
     set_state(config.state_file, "recording")
     if kind == "stream" and config.auto_stop_silence_seconds > 0:
         watcher_pid = _start_auto_stop_watcher(kind)
+        _update_session(kind, {"watcher_pid": watcher_pid})
+    elif config.max_record_seconds > 0:
+        # arecord завершится сам по --duration; сторож закроет сессию и отправит
+        # запись на распознавание, иначе состояние висит в "recording".
+        watcher_pid = _start_limit_watcher(kind)
         _update_session(kind, {"watcher_pid": watcher_pid})
     print(f"{kind} recording started")
     return 0
@@ -171,6 +273,8 @@ def _stop(kind: str, config: VoiceTypeConfig, stopped_by: str = "manual") -> int
             insert_text(text, config.insert_method)
             if stopped_by == "auto_silence":
                 print("auto-stopped after silence")
+            elif stopped_by == "auto_limit":
+                print("stopped at recording limit")
             print(text)
         else:
             set_state(config.state_file, "ready")

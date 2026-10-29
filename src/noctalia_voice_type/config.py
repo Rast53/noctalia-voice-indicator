@@ -36,6 +36,8 @@ class VoiceTypeConfig:
     auto_stop_silence_seconds: float
     auto_stop_min_record_seconds: float
     auto_stop_rms_threshold: int
+    max_record_seconds: int
+    stale_record_hours: float
 
     @classmethod
     def from_env(cls) -> "VoiceTypeConfig":
@@ -57,4 +59,6 @@ class VoiceTypeConfig:
             auto_stop_silence_seconds=float(os.environ.get("VOICE_TYPE_AUTO_STOP_SILENCE_SECONDS", "10") or "10"),
             auto_stop_min_record_seconds=float(os.environ.get("VOICE_TYPE_AUTO_STOP_MIN_RECORD_SECONDS", "2") or "2"),
             auto_stop_rms_threshold=int(os.environ.get("VOICE_TYPE_AUTO_STOP_RMS_THRESHOLD", "500") or "500"),
+            max_record_seconds=int(os.environ.get("VOICE_TYPE_MAX_RECORD_SECONDS", "1800") or "1800"),
+            stale_record_hours=float(os.environ.get("VOICE_TYPE_STALE_RECORD_HOURS", "12") or "12"),
         )

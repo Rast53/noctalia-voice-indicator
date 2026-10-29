@@ -81,6 +81,20 @@ def run_checks(config: VoiceTypeConfig | None = None) -> list[Check]:
     checks.append(Check("auto_stop_silence_seconds", "OK", str(config.auto_stop_silence_seconds)))
     checks.append(Check("auto_stop_min_record_seconds", "OK", str(config.auto_stop_min_record_seconds)))
     checks.append(Check("auto_stop_rms_threshold", "OK", str(config.auto_stop_rms_threshold)))
+    checks.append(Check("max_record_seconds", "OK", str(config.max_record_seconds)))
+    checks.append(Check("stale_record_hours", "OK", str(config.stale_record_hours)))
+
+    # Каталог записей: показываем путь/размер и подчищаем осиротевшие WAV,
+    # чтобы утечка в tmpfs была видна до того, как забьёт /tmp.
+    from .toggle import cleanup_stale_recordings, recordings_dir, recordings_stats
+
+    removed, freed = cleanup_stale_recordings(config)
+    count, total = recordings_stats()
+    directory = recordings_dir()
+    message = f"{directory} ({count} file(s), {total / (1024 * 1024):.1f} MiB)"
+    if removed:
+        message += f"; cleaned {removed} stale file(s), freed {freed / (1024 * 1024):.1f} MiB"
+    checks.append(Check("recordings_dir", "OK" if directory.parent.exists() else "WARN", message))
     return checks
 
 
